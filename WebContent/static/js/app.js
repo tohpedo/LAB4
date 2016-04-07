@@ -15,7 +15,7 @@ $("#createTodo").click(function(){
 			if(data.code == "Success"){
 				alert("Success!");
 			}else{
-				alert("Error! Message is "+data.message);
+				alert("Error! Message is " + data.message);
 			}
 		},
 		error: function(data,status,xhr){
@@ -27,18 +27,21 @@ $("#createTodo").click(function(){
 
 $("#getJSON").click(
 			function() {
-				var id = $("#todoId_get").val();
+				var input_id = $("#todoId_get").val();
 				$.ajax({
 					type : 'GET',
-					url : "/LAB4/json" + "?id=" + id,
+					url : "/LAB4/json/" + input_id,
+					dataType: "json",
 					success : function(response) {
-						$("#responseHeader").html(response);
+						alert("Success!");
 					},
 					error : function(response) {
-						$("#responseHeader").html(response);
-					}
+						alert("Error!");
+					},
+				
 				});
-			});					
+			});	
+
 $("#getXML").click(
 		function() {
 			var id = $("#todoId_get").val();
@@ -112,4 +115,3 @@ $("#createTodo").click(
 				},
 			});	
 */
-		});

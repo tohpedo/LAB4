@@ -1,7 +1,5 @@
 import javax.xml.bind.annotation.*;
 
-
-
 @XmlRootElement(name = "todoMessage")
 @XmlType(propOrder ={"id","message"})
 public class TodoMessage {
@@ -26,5 +24,20 @@ public class TodoMessage {
 	public String toString(){
 		return "Message #" + this.id + ": " + this.message;
 	}
-	
+	 @Override
+	 public boolean equals(Object o) {
+		 System.out.println("reached here");
+	     if(o == null) {
+	    	 return false;
+	     }else if( o instanceof TodoMessage){
+	        int a_id = (Integer) ((TodoMessage) o).getId();
+	        if(this.getId() == a_id){
+	        	return true;
+	        }
+	        else {
+	        return false;
+	        }       
+	    }
+	     return false;
+	    }
 }
