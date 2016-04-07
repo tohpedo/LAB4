@@ -1,0 +1,3 @@
+# LAB4
+
+RESTFUL TODO SERVLET. RUN ON http://LOCALHOST:8080/LAB4/static/index.html
