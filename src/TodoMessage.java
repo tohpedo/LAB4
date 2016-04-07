@@ -24,9 +24,10 @@ public class TodoMessage {
 	public String toString(){
 		return "Message #" + this.id + ": " + this.message;
 	}
+	
+	//HELPER METHOD TO USE INDEX_OF FOR LIST
 	 @Override
 	 public boolean equals(Object o) {
-		 System.out.println("reached here");
 	     if(o == null) {
 	    	 return false;
 	     }else if( o instanceof TodoMessage){

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -22,9 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("/")
 public class TodoMessages{
 	
-	//TodoMessageList messages = new TodoMessageList();
-	ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
-
 	public TodoMessages() {
 	}
 
@@ -34,26 +32,30 @@ public class TodoMessages{
 	@Path("/create")
 	public Response createMessage(@FormParam("id") String p_id, @FormParam("message") String p_message){
 		int id = Integer.parseInt(p_id);
-				System.out.println(id);
-					System.out.println(p_message);
+		System.out.println("Creating Todo with id: " + id);
+		System.out.println("And message: " + p_message);
 		List<TodoMessage> m = TodoMessageList.getMessages();
 		TodoMessage tm = new TodoMessage();
 		tm.setMessage(p_message);
 		tm.setId(id);
-		m.add(tm);
-		TodoMessageList.setMessages(m);
 		ServerResponse s = new ServerResponse();
-		s.code = "Success";
-		s.message = "You have successfully inserted your message!";
+		try{
+			m.add(tm);
+			TodoMessageList.setMessages(m);
+			s.code = "Success";
+			s.message = "Your message has successfully been created!";
+		}
+		catch(Exception e){
+			s.code = "Error";
+			s.message = "Unable to insert your message";
+		}
 		String json = "";	
-		//map.put(p_id, p_message);
 		try {
 			json = new ObjectMapper().writeValueAsString(s);
 		} catch (Exception e) {
 			return Response.status(500).build();
 		}
 		return Response.ok(json,"application/json").build();
-	
 	}
 	
 	
@@ -62,18 +64,21 @@ public class TodoMessages{
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/json/{id}")
 	public Response getMessageJSON(@PathParam("id") String p_id) {
-			System.out.println("xx - " + p_id);
+		System.out.println("Getting message with id#" + p_id + " using JSON...");
 		int id = Integer.parseInt(p_id);
 		List<TodoMessage> m = TodoMessageList.getMessages();
 		TodoMessage tmp = new TodoMessage();
 		tmp.setId(id);
-		TodoMessage message = m.get(m.indexOf(tmp));
-			System.out.println("1234 - " + message.getMessage() );
+		int index = m.indexOf(tmp);
+		TodoMessage todo;
+		if(index >= 0) {
+			todo = m.get(index);
+		}else{
+			todo = new TodoMessage();
+			todo.setMessage("Unable to retrieve your message");
+		}
 		String json = "";	
-			System.out.println(message);
-		TodoMessage todo = new TodoMessage();
-		todo.setId(id);
-		todo.setMessage(message.getMessage());
+		System.out.println("Your message is:" + todo.getMessage());
 		try {
 			json = new ObjectMapper().writeValueAsString(todo);
 		} catch (Exception e) {
@@ -82,79 +87,100 @@ public class TodoMessages{
 		return Response.ok(json,"application/json").build();
 	}
 	
+	@GET
+	@Produces({ MediaType.APPLICATION_XML })
+	@Path("/xml/{id}")
+	public Response getMessageXML(@PathParam("id") String p_id) {
+		System.out.println("Getting message with id#" + p_id + " using XML...");
+		int id = Integer.parseInt(p_id);
+		List<TodoMessage> m = TodoMessageList.getMessages();
+		TodoMessage tmp = new TodoMessage();
+		tmp.setId(id);
+		int index = m.indexOf(tmp);
+		TodoMessage todo;
+		if(index >= 0) {
+			todo = m.get(index);
+		}else{
+			todo = new TodoMessage();
+			todo.setMessage("Unable to retrieve your message");
+		}
+		String json = "";	
+		System.out.println("Your message is:" + todo.getMessage());
+		try {
+			json = new ObjectMapper().writeValueAsString(todo);
+		} catch (Exception e) {
+			return Response.status(500).build();
+		}
+		return Response.ok(json,"application/xml").build();
+	}
 	
-	
-/*
+	@DELETE
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Path("/delete/{id}")
+	public Response deleteId(@PathParam("id") String p_id) {
+		System.out.println("Attempting to delete Todo with id = " + p_id);
+		int id = Integer.parseInt(p_id);
+		List<TodoMessage> m = TodoMessageList.getMessages();
+		TodoMessage tmp = new TodoMessage();
+		tmp.setId(id);
+		int index = m.indexOf(tmp);
+		ServerResponse s = new ServerResponse();
+		if(index >= 0) {
+			m.remove(index);
+			s.code = "Success";
+			s.message = "Todo deleted successfully";
+			System.out.println("Message deleted succesfully.");
+		}
+		else{
+			s.code = "Error";
+			s.message = "Unable to delete Todo";
+			System.out.println("Error deleting message");
+		}
+		String json = "";	
+		try {
+			json = new ObjectMapper().writeValueAsString(s);
+		} catch (Exception e) {
+			return Response.status(500).build();
+		}
+		return Response.ok(json,"application/json").build();
+	}
+
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/all/json")
-	public Response getAllmessageJSON() {
-		ArrayList<TodoMessage> m = messages.getMessages();
-		return Response.ok(m, "application/json").build();
+	public Response getAllMessagesJSON() {
+		System.out.println("Getting all messages using JSON...");
+		List<TodoMessage> m = TodoMessageList.getMessages();
+		m.forEach(todo->System.out.println("ID# " + todo.getId() + " : " + todo.getMessage()));
+		String json = "";	
+		try {
+			json = new ObjectMapper().writeValueAsString(m);
+		} catch (Exception e) {
+			return Response.status(500).build();
+		}
+		return Response.ok(json,"application/json").build();
 	}
+	
+	@GET
+	@Produces({ MediaType.APPLICATION_XML })
+	@Path("/all/xml")
+	public Response getAllMessagesXML() {
+		System.out.println("Getting all messages using XML...");
+		List<TodoMessage> m = TodoMessageList.getMessages();
+		m.forEach(todo->System.out.println("ID# " + todo.getId() + " : " + todo.getMessage()));
+		String xml = "";	
+		try {
+			xml = new ObjectMapper().writeValueAsString(m);
+		} catch (Exception e) {
+			return Response.status(500).build();
+		}
+		return Response.ok(xml,"application/xml").build();
+	}
+	
 	
 	private JAXBElement<TodoMessage> toXml(TodoMessage message){
 		return new JAXBElement<TodoMessage>(new QName("todoMessage"), TodoMessage.class, message);
 	}
-	
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Path("/json/{id: [0-9]+}")
-	public Response getIdmessageJSON(@PathParam("id") String p_id) {
-		int id = Integer.parseInt(p_id);
-		String message = messages.get(id);
-		return Response.ok(message, "application/json").build();
-	}
-/*
-	@GET
-	@Produces({ MediaType.APPLICATION_XML})
-	@Path("/xml/id: [0-9]+")
-	public Response getIdmessageXML(@PathParam("id") String p_id) {
-		int id = Integer.parseInt(p_id);
-		return Response.ok(message, "application/xml").build();
-	}
-
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Path("/all/json")
-	public Response getAllmessageJSON() {
-		return Response.ok(messages, "application/json").build();
-	}
-
-	@GET
-	@Produces({ MediaType.APPLICATION_XML })
-	@Path("/all/xml")
-	public Response getAllmessageXML() {
-		return Response.ok(messages, "application/xml").build();
-	}
-
-	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Path("/create")
-	public Response createMessage(@PathParam("id") String p_id, @PathParam("message") String p_message) {
-		int id = Integer.parseInt(p_id);
-		List<TodoMessage> m = messages.getMessages();
-		TodoMessage tm = new TodoMessage();
-		tm.setMessage(p_message);
-		tm.setId(id);
-		m.add(tm);
-		messages.setMessages(m);
-		return Response.ok("Message created successfully", "application/json").build();
-	}
-
-	@DELETE
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Path("/delete")
-	public Response deleteId(@PathParam("id") String p_id) {
-		int id = Integer.parseInt(p_id);
-		int index = messages.findMessage(id);
-		List<TodoMessage> m = messages.getMessages();
-		m.remove(index);
-		messages.setMessages(m);
-		return Response.ok("Message deleted successfully", "application/json").build();
-	}
-	*/
 	
 
 }
